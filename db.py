@@ -51,10 +51,14 @@ class ItemDB:
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_brief_date ON items(brief_date)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_filter_pass ON items(filter_pass)')
         self.conn.commit()
-        logger.debug("Database and indexes initialized at %s", self.db_path)
-
     def close(self):
         self.conn.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
 
     # 写入(自动去重,已存在的不覆盖,但可以更新)
     def upsert_items(self, items: list[Item]) -> tuple[int, int]:
